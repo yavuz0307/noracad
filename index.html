@@ -278,7 +278,7 @@ EOF
       (function next(){
         if (window[globalName]) return resolve();
         if (i>=urls.length) return reject(new Error(globalName+' yüklenemedi'));
-        var s=document.createElement('script'); s.src=urls[i++];
+        var s=document.createElement('script'); s.crossOrigin='anonymous'; s.src=urls[i++];
         s.onload=function(){ window[globalName] ? resolve() : next(); };
         s.onerror=next; document.head.appendChild(s);
       })();
