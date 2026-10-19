@@ -1981,7 +1981,14 @@ setInterval(function(){document.body.classList.contains("nc-rm-edit")&&!document
   function update(){
     var S=S_();if(!S||!window.THREE)return;
     var ms=[S.group].concat(S.copies||[]);
-    ms.forEach(setup);ms.forEach(drive);ms.forEach(follow);
+    ms.forEach(setup);ms.forEach(hideRefs);ms.forEach(drive);ms.forEach(follow);
+  }
+  // nesne referanslarini (modul/kapak/mentese) JSON'da gorunmez yap: dongusel JSON hatasini onler
+  function hideRefs(m){
+    if(!m||!m.traverse)return;
+    try{m.traverse(function(o){var u=o.userData;if(!u)return;Object.keys(u).forEach(function(k){var v=u[k];
+      if(k.indexOf('_hg')===0&&v&&typeof v==='object'&&v.isObject3D)Object.defineProperty(u,k,{value:v,enumerable:false,writable:true,configurable:true});
+    })})}catch(e){}
   }
   function hook(){
     var S=S_();if(!S||!S.renderer)return;
