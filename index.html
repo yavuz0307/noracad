@@ -680,7 +680,7 @@ show();watch(2500,45000);
   document.addEventListener("visibilitychange",function(){if(document.visibilityState==="visible")check(false)});
 })();
 </script>
-<div id="verbadge" style="position:fixed;right:8px;bottom:8px;z-index:9998;font:700 14px/1 system-ui,sans-serif;color:#fff;background:#1b3328;border-radius:6px;padding:6px 10px;pointer-events:none;user-select:none;box-shadow:0 2px 6px rgba(0,0,0,.35);">v 2026.11.23-DEMO-3</div>
+<div id="verbadge" style="position:fixed;right:8px;bottom:8px;z-index:9998;font:700 14px/1 system-ui,sans-serif;color:#fff;background:#1b3328;border-radius:6px;padding:6px 10px;pointer-events:none;user-select:none;box-shadow:0 2px 6px rgba(0,0,0,.35);">v 2026.11.23-DEMO-4</div>
 
 <!-- Giriş / Lisans kapısı -->
 <div id="authgate">
@@ -1317,7 +1317,13 @@ function outlines(R,pid,on,sig){R.children.forEach(function(c){if(!(c.userData&&
 function frameOf(R,inv){var L=[],Rr=[];R.traverse(function(o){if(!o.isMesh||!o.userData)return;var u=o.userData;if(u.kind==="hardware"||u._ncKulpPiece)return;if(u.partId==="sidepanel-left")L.push(o);else if(u.partId==="sidepanel-right")Rr.push(o)});
   if(!L.length||!Rr.length)return null;var bl=new T.Box3(),br=new T.Box3();L.forEach(function(o){bl.union(lbox(o,inv))});Rr.forEach(function(o){br.union(lbox(o,inv))});
   return{xL:bl.min.x,xR:br.max.x,zB:Math.min(bl.min.z,br.min.z),zF:Math.max(bl.max.z,br.max.z),y0:Math.min(bl.min.y,br.min.y),y1:Math.max(bl.max.y,br.max.y),t:bl.max.x-bl.min.x,L:L,Rr:Rr}}
-function applyRoot(R){var map=mapOf(R),kv=norm(map),S=S_();R.updateMatrixWorld(true);var inv=new T.Matrix4().copy(R.matrixWorld).invert();
+/* NORA-KAVIS-ACIK-KAPAK: kapak / cekmece acikken kavis hesabi kapali konumuna gore yapilir (acik kapagin capraz kutusu kapak kalinligi sanilmasin) */
+function applyRoot(R){var SV=[];try{R.traverse(function(o){var u=o.userData,A=u&&u.animOpen;if(!A||A.cx==null||A.cy==null||A.cz==null)return;var p=o.position,r=o.rotation,rot=Math.abs(r.x)+Math.abs(r.y)+Math.abs(r.z);
+  if(A.type==="door"&&!A.fold){if(rot<1e-7&&Math.abs(p.x-A.cx)<1e-7&&Math.abs(p.y-A.cy)<1e-7&&Math.abs(p.z-A.cz)<1e-7)return;SV.push([o,p.clone(),r.clone()]);p.set(A.cx,A.cy,A.cz);r.set(0,0,0)}
+  else if(A.type==="slide"&&Math.abs(p.z-A.cz)>1e-7){SV.push([o,p.clone(),r.clone()]);p.z=A.cz}
+  else if(A.type==="lift"&&Math.abs(p.y-A.cy)>1e-7){SV.push([o,p.clone(),r.clone()]);p.y=A.cy}})}catch(_e){}
+  try{return applyRoot0(R)}finally{if(SV.length){SV.forEach(function(q){q[0].position.copy(q[1]);q[0].rotation.copy(q[2])});R.updateMatrixWorld(true)}}}
+function applyRoot0(R){var map=mapOf(R),kv=norm(map),S=S_();R.updateMatrixWorld(true);var inv=new T.Matrix4().copy(R.matrixWorld).invert();
   if(!kv){if(R.userData._ncKvAny){R.traverse(function(o){if(o.userData&&(ORIG.has(o)||o.userData._ncKvHid||o.userData._ncKvSig||o.userData._ncKvGeo))restore(o)});for(var di=R.children.length-1;di>=0;di--){var dc=R.children[di];if(dc.userData&&dc.userData._ncKvDk)R.remove(dc)}R.traverse(function(o){var H=HG0.get(o);if(!H)return;var u=o.userData;if(H.P0&&u._hgP0)u._hgP0.copy(H.P0);if(H.A&&u._hgA)u._hgA.copy(H.A);if(H.B0&&u._hgB0)u._hgB0.copy(H.B0);HG0.delete(o)});R.userData._ncKvAny=false}return}
   var F=frameOf(R,inv);if(!F)return;var t=F.t;if(t<.003||t>.06)return;R.userData._ncKvAny=true;
   var D=F.zF-F.zB,sig=JSON.stringify(map)+"|"+[F.xL,F.xR,F.zB,F.zF,F.y0,F.y1].map(function(v){return Math.round(v*1e4)}).join(",");/* NORA-KAVIS-KAPAMA-OFSET: ust kapama ofsetleri (oklar) kavisli modulde de uygulanir */var KOF=[0,0,0,0];try{var _cf=(R===S.group)?(window.__ncActiveCfg&&window.__ncActiveCfg()):(R.userData&&R.userData.config);if(_cf)KOF=[+_cf.topPanelOffL||0,+_cf.topPanelOffR||0,+_cf.topPanelOffF||0,+_cf.topPanelOffB||0].map(function(v){return v/1000})}catch(_e){}sig+="|ko"+KOF.join(",");/* radus de ofset kadar buyur / kuculur ki kavis govdeyle ayni merkezli kalsin */var kvOf=function(k0,o){var k=JSON.parse(JSON.stringify(k0));[["fl",0,2],["fr",1,2],["bl",0,3],["br",1,3]].forEach(function(e){var q=k[e[0]];if(!q)return;var d=Math.max(o[e[1]],o[e[2]])*1000;if(o[e[1]]<0||o[e[2]]<0)d=Math.min(o[e[1]],o[e[2]])*1000;q.R=Math.max(5,q.R+d)});return k};
